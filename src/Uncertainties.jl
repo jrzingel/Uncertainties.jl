@@ -1,22 +1,32 @@
 module Uncertainties
 
 # To extend the base operations
-import Base: +,-,==,*,/,^,sqrt
-import Base: promote, promote_rule
+import Base: +,-,==,*,/,^,≈
+import Base: promote_rule, convert
 
-# Uncertainty with the values using any real number, which is a subtype of real numbers
-# (should it be only floats instead?)
+# Store as floating point for division to make sense (ie integers are converted)
 struct Uncertainty{T<:AbstractFloat} <: AbstractFloat
     nom::T
     uncert::T
 end
 
 Uncertainty(nom::AbstractFloat) = Uncertainty(nom, 0.0)
-Uncertainty(a::Type{T}, b::Type{S}) where {T<:Real, S<:Real} = Uncertainty(promote(a,b)...)
+Uncertainty(nom::Integer) = Uncertainty(nom, 0.0)
+Uncertainty(nom::Rational) = Uncertainty(nom, 0.0)
 
-promote_rule(::Type{Uncertainty{T}}, ::Type{S}) where {T<:AbstractFloat, S<:AbstractFloat} = Uncertainty{promote_type(T,S)}
-#promote(un::Uncertainty, a::AbstractFloat)::Uncertainty = 
-#Uncertainty(a<:Integer, b<:Integer) = Uncertainty()
+function Uncertainty(a::Real, b::Real)
+    if typeof(a) <: AbstractFloat || typeof(b) <: AbstractFloat
+        return Uncertainty(promote(a,b)...)
+    end
+    # Use Float64 probably
+    return Uncertainty(convert(AbstractFloat, a), convert(AbstractFloat, b))
+end
+
+# Allow Uncertainty{AbstractFloat} + 3.3 to be valid
+#convert(::Type{Uncertainty}, a::Float64) = Uncertainty(a)
+#promote_rule(::Type{Uncertainty{T}}, ::Type{T}) where {T <: AbstractFloat} = Uncertainty{T}
+
+# Overload basic methods
 
 +(a::Uncertainty, b::Uncertainty)::Uncertainty = Uncertainty(a.nom + b.nom, a.uncert+b.uncert)
 -(a::Uncertainty, b::Uncertainty)::Uncertainty = Uncertainty(a.nom - b.nom, a.uncert+b.uncert)
@@ -27,8 +37,8 @@ promote_rule(::Type{Uncertainty{T}}, ::Type{S}) where {T<:AbstractFloat, S<:Abst
 
 ^(a::Uncertainty, b::AbstractFloat)::Uncertainty = Uncertainty(a.nom^b, (a.uncert/a.nom)*(a.nom*b))
 
-
 ==(a::Uncertainty, b::Uncertainty) = (a.nom == b.nom) && (a.uncert == b.uncert)
+≈(a::Uncertainty, b::Uncertainty) = (a.nom ≈ b.nom) && (a.uncert ≈ b.uncert)
 
 
 export Uncertainty
