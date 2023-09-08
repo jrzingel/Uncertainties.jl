@@ -1,16 +1,19 @@
 # no Uncertainty
-@test Uncertainty(2.0) == Uncertainty(2.0, 0.0)
-@test Uncertainty(3//2) == Uncertainty(1.5, 0.0)
-@test Uncertainty(4) == Uncertainty(4.0, 0.0)
+@test uncertainty(2.0) == uncertainty(2.0, 0.0)
+@test uncertainty(3//2) == uncertainty(1.5, 0.0)
+@test uncertainty(4) == uncertainty(4.0, 0.0)
+
 
 # with uncertainty
+# with ± symbol
+@test (3.0 ± 2.0) == uncertainty(3.0, 2.0)
 # creation with Integer
-@test Uncertainty(2, 1) == Uncertainty(2.0, 1.0)
-@test Uncertainty(2, 1.0) == Uncertainty(2.0, 1.0)
-@test Uncertainty(2.0, 1) == Uncertainty(2.0, 1.0)
+@test uncertainty(2, 1) == uncertainty(2.0, 1.0)
+@test uncertainty(2, 1.0) == uncertainty(2.0, 1.0)
+@test uncertainty(2.0, 1) == uncertainty(2.0, 1.0)
 
 # creation with Rational
-@test Uncertainty(4//2, 1.0) == Uncertainty(2.0, 1.0)
+@test uncertainty(4//2, 1.0) == uncertainty(2.0, 1.0)
 
 # different float types
-@test Uncertainty(Float32(2.3), Float64(1.0)) == Uncertainty(Float32(2.3), Float64(1.0))
+@test uncertainty(Float32(2.3), Float64(1.0)) == uncertainty(Float32(2.3), Float64(1.0))
